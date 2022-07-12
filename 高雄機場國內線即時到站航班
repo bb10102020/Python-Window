@@ -1,0 +1,77 @@
+import tkinter as tk
+import DataSource
+import datetime
+
+now = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
+
+class Window(tk.Tk):
+    def __init__(self):
+        global text_var
+        super().__init__()
+        titleFrame = tk.Frame(self,padx=20,pady=10)
+        titleFrame.pack(pady=(10,0))
+        tk.Label(titleFrame,text="高雄機場國內線即時到站航班 ✈ ",font=('arial',30,'bold'),fg="#555555",width=32).pack()
+# ------設置更新按鈕----------------------------------------------------------------------
+        text_var = tk.StringVar()
+        text_var.set("資料時間：" + now)
+        tk.Label(titleFrame, textvariable=text_var, font=('arial', 10), fg="#555555").pack(side=tk.LEFT,pady=(20, 0))
+        updateButton = tk.Button(titleFrame,text="立即更新",font=('arial',10,'bold'),fg="#555555",command=lambda :self.button_update())
+        updateButton.pack(side=tk.RIGHT)
+#-------設置地區按鈕---------------------------------------------------------------------
+        topFrame = tk.Frame(self,borderwidth=4,relief='groove',background="#FFE5B4")
+        topFrame.pack(padx=20, pady=(0,20))
+        tk.Label(topFrame, text="航班目的地：", font=('arial', 20), fg="#555555",background="#FFE5B4").pack(side=tk.LEFT,padx=(20,0))
+        btn1 = tk.Button(topFrame, text=DataSource.AREA[0],font=('arial',15,'bold'),fg="#555555", padx=20, pady=20,command=lambda :createNewWindow(1))
+        btn1.bind('<Button-1>',self.areaClick)
+        btn1.pack( side=tk.LEFT,padx=(0,20), pady=20)
+
+        btn2 = tk.Button(topFrame, text=DataSource.AREA[1],font=('arial',15,'bold'),fg="#555555", padx=20, pady=20,command=lambda :createNewWindow(2))
+        btn2.bind('<Button-1>',self.areaClick)
+        btn2.pack(side=tk.LEFT, padx=(0,20), pady=20)
+
+        btn3 = tk.Button(topFrame, text=DataSource.AREA[2],font=('arial',15,'bold'),fg="#555555", padx=20, pady=20,command=lambda :createNewWindow(3))
+        btn3.bind('<Button-1>',self.areaClick)
+        btn3.pack(side=tk.LEFT, padx=(0,20), pady=20)
+
+        btn4 = tk.Button(topFrame, text=DataSource.AREA[3],font=('arial',15,'bold'),fg="#555555", padx=20, pady=20,command=lambda :createNewWindow(4))
+        btn4.bind('<Button-1>',self.areaClick)
+        btn4.pack(side=tk.LEFT, padx=(0,20), pady=20)
+
+        btn5 = tk.Button(topFrame, text=DataSource.AREA[4],font=('arial',15,'bold'),fg="#555555", padx=20, pady=20,command=lambda :createNewWindow(5))
+        btn5.bind('<Button-1>',self.areaClick)
+        btn5.pack(side=tk.LEFT, padx=(0,20), pady=20)
+
+    def button_update(self):
+        now = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
+        text_var.set("資料時間：" + now)
+        DataSource.download()
+
+    def areaClick(self,even):
+        areaName = even.widget["text"]
+        areaList = []
+        airlist = DataSource.DATA['InstantSchedule']
+        for n in airlist:
+            if areaName == n['upAirportName'] :
+                areaList.append(n)
+# ----------------------------------------------------------------------------------------------
+def createNewWindow(num):
+    dict = {1:'澎湖',2:'望安',3:'金門',4:'七美',5:'花蓮'}
+    newWindow = tk.Toplevel(background='#FFFFF0')
+    newWindow.geometry()
+    airlist = DataSource.DATA['InstantSchedule']
+    controll = 0
+    for n in airlist:
+        if n['upAirportName'] == dict[num]:
+            lable = tk.Label(newWindow,height=2,width=100,borderwidth=3,relief='groove', text="班表時間：" + n['expectTime'] + "\t\t班機編號：" + n['airLineCode'] + "\t\t航空公司：" + n['airLineName'] + "\t\t狀態：" + n['airFlyStatus'],font=('arial',8),fg="#555555",background='#ebe2d3')
+            lable.pack(pady=5,padx=10)
+            controll += 1
+    if controll == 0:
+        lable = tk.Label(newWindow,height=2,width=20,text="< 現無班機資訊 >",font=('arial',20),fg="#555555")
+        lable.pack()
+# ----------------------------------------------------------------------------------------------
+if __name__ == "__main__":
+    root = Window()
+    root.geometry('850x250')
+    root.resizable(width=0,height=0)
+    root.title("高雄機場國內線即時到站航班")
+    root.mainloop()
